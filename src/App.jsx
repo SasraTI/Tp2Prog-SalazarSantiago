@@ -1,6 +1,7 @@
 import { LoadingButton } from "@mui/lab";
 import { Box, Container, TextField, Typography } from "@mui/material";
 import { useState } from "react";
+import axios from "axios"
 
 const API_WEATHER = `http://api.weatherapi.com/v1/current.json?key=${
   import.meta.env.VITE_API_KEY
@@ -27,18 +28,26 @@ export default function App() {
     e.preventDefault();
     setError({ error: false, message: "" });
     setLoading(true);
-
+  
     try {
       if (!city.trim()) throw { message: "El campo ciudad es obligatorio" };
-
+  
       const res = await fetch(API_WEATHER + city);
       const data = await res.json();
-
+  
       if (data.error) {
         throw { message: data.error.message };
       }
-
+  
       console.log(data);
+  
+      await fetch('http://localhost:3000/api/search-history', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ city: data.location.name }), // Enviar el nombre de la ciudad dentro de un objeto JSON
+});
 
       setWeather({
         city: data.location.name,
@@ -55,6 +64,7 @@ export default function App() {
       setLoading(false);
     }
   };
+  
 
   return (
     <Container
